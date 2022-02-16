@@ -11663,6 +11663,13 @@ func (p *parser) visitExprInOut(expr js_ast.Expr, in exprIn) (js_ast.Expr, exprO
       props := []js_ast.Property{}
 
       if len(e.Children) > 0 {
+        var childrenPropValue js_ast.E
+        if len(e.Children) > 1 {
+          childrenPropValue = &js_ast.EArray{ Items: e.Children }
+        } else {
+          childrenPropValue = e.Children[0].Data
+        }
+
         props = append(
           props,
           js_ast.Property{
@@ -11672,9 +11679,7 @@ func (p *parser) visitExprInOut(expr js_ast.Expr, in exprIn) (js_ast.Expr, exprO
             },
             ValueOrNil: js_ast.Expr{
               Loc: expr.Loc,
-              Data: &js_ast.EArray{
-                Items: e.Children,
-              },
+              Data: childrenPropValue,
             },
             Kind: js_ast.PropertyNormal,
             IsComputed: false,
