@@ -11660,16 +11660,53 @@ func (p *parser) visitExprInOut(expr js_ast.Expr, in exprIn) (js_ast.Expr, exprO
 
 			// Arguments to createElement()
 			args := []js_ast.Expr{e.TagOrNil}
-			if len(e.Properties) > 0 {
-				args = append(args, p.lowerObjectSpread(expr.Loc, &js_ast.EObject{
-					Properties: e.Properties,
-				}))
-			} else {
-				args = append(args, js_ast.Expr{Loc: expr.Loc, Data: js_ast.ENullShared})
-			}
-			if len(e.Children) > 0 {
-				args = append(args, e.Children...)
-			}
+      props := []js_ast.Property{}
+
+      if len(e.Children) > 0 {
+        props = append(
+          props,
+          js_ast.Property{
+            Key: js_ast.Expr{
+              Loc: expr.Loc,
+              Data: &js_ast.EString{Value: helpers.StringToUTF16("children")},
+            },
+            ValueOrNil: js_ast.Expr{
+              Loc: expr.Loc,
+              Data: &js_ast.EArray{
+                Items: e.Children,
+              },
+            },
+            Kind: js_ast.PropertyNormal,
+            IsComputed: false,
+            IsMethod: false,
+            IsStatic: false,
+            PreferQuotedKey: false,
+          },
+        )
+      }
+
+      if len(e.Properties) > 0 {
+        props = append(props, e.Properties...)
+      }
+
+      if len(props) > 0 {
+        args = append(args, p.lowerObjectSpread(expr.Loc, &js_ast.EObject{ Properties: props }))
+      } else {
+        // Needs to be an empty object instead of null
+        args = append(args, js_ast.Expr{Loc: expr.Loc, Data: &js_ast.EObject{}})
+				// args = append(args, js_ast.Expr{Loc: expr.Loc, Data: js_ast.ENullShared})
+      }
+
+			// if len(e.Properties) > 0 {
+			// 	args = append(args, p.lowerObjectSpread(expr.Loc, &js_ast.EObject{
+			// 		Properties: e.Properties,
+			// 	}))
+			// } else {
+			// 	args = append(args, js_ast.Expr{Loc: expr.Loc, Data: js_ast.ENullShared})
+			// }
+			// if len(e.Children) > 0 {
+			// 	args = append(args, e.Children...)
+			// }
 
 			// Call createElement()
 			target := p.jsxStringsToMemberExpression(expr.Loc, p.options.jsx.Factory.Parts)
