@@ -112,6 +112,13 @@ const (
 	JSXModePreserve
 )
 
+type JSXTransform uint8
+
+const (
+  JSXTransformOld JSXTransform = iota
+  JSXTransformNew
+)
+
 type Target uint8
 
 const (
@@ -275,9 +282,14 @@ type BuildOptions struct {
 	IgnoreAnnotations bool                   // Documentation: https://esbuild.github.io/api/#ignore-annotations
 	LegalComments     LegalComments          // Documentation: https://esbuild.github.io/api/#legal-comments
 
-	JSXMode     JSXMode // Documentation: https://esbuild.github.io/api/#jsx-mode
-	JSXFactory  string  // Documentation: https://esbuild.github.io/api/#jsx-factory
-	JSXFragment string  // Documentation: https://esbuild.github.io/api/#jsx-fragment
+	JSXMode             JSXMode       // Documentation: https://esbuild.github.io/api/#jsx-mode
+  JSXTransform        JSXTransform  // Documentation: https://esbuild.github.io/api/#jsx-transform
+	JSXFactory          string        // Documentation: https://esbuild.github.io/api/#jsx-factory
+  JSXStaticFactory    string        // Documentation: https://esbuild.github.io/api/#jsx-static-factory
+  JSXDynamicFactory   string        // Documentation: https://esbuild.github.io/api/#jsx-dynamic-factory
+	JSXFragment         string        // Documentation: https://esbuild.github.io/api/#jsx-fragment
+  JSXAutomaticRuntime bool          // Documentation: https://esbuild.github.io/api/#jsx-automatic-runtime
+  JSXImportSource     string        // Documentation: https://esbuild.github.io/api/#jsx-import-source
 
 	Define    map[string]string // Documentation: https://esbuild.github.io/api/#define
 	Pure      []string          // Documentation: https://esbuild.github.io/api/#pure
@@ -391,9 +403,14 @@ type TransformOptions struct {
 	IgnoreAnnotations bool                   // Documentation: https://esbuild.github.io/api/#ignore-annotations
 	LegalComments     LegalComments          // Documentation: https://esbuild.github.io/api/#legal-comments
 
-	JSXMode     JSXMode // Documentation: https://esbuild.github.io/api/#jsx
-	JSXFactory  string  // Documentation: https://esbuild.github.io/api/#jsx-factory
-	JSXFragment string  // Documentation: https://esbuild.github.io/api/#jsx-fragment
+	JSXMode             JSXMode       // Documentation: https://esbuild.github.io/api/#jsx-mode
+  JSXTransform        JSXTransform  // Documentation: https://esbuild.github.io/api/#jsx-transform
+	JSXFactory          string        // Documentation: https://esbuild.github.io/api/#jsx-factory
+  JSXStaticFactory    string        // Documentation: https://esbuild.github.io/api/#jsx-static-factory
+  JSXDynamicFactory   string        // Documentation: https://esbuild.github.io/api/#jsx-dynamic-factory
+	JSXFragment         string        // Documentation: https://esbuild.github.io/api/#jsx-fragment
+  JSXAutomaticRuntime bool          // Documentation: https://esbuild.github.io/api/#jsx-automatic-runtime
+  JSXImportSource     string        // Documentation: https://esbuild.github.io/api/#jsx-import-source
 
 	TsconfigRaw string // Documentation: https://esbuild.github.io/api/#tsconfig-raw
 	Banner      string // Documentation: https://esbuild.github.io/api/#banner

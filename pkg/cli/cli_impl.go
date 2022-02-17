@@ -515,6 +515,22 @@ func parseOptionsImpl(
 				transformOpts.JSXFactory = value
 			}
 
+    case strings.HasPrefix(arg, "--jsx-static-factory="):
+      value := arg[len("--jsx-static-factory="):]
+      if buildOpts != nil {
+        buildOpts.JSXStaticFactory = value
+      } else {
+        transformOpts.JSXStaticFactory = value
+      }
+
+    case strings.HasPrefix(arg, "--jsx-dynamic-factory="):
+      value := arg[len("--jsx-dynamic-factory="):]
+      if buildOpts != nil {
+        buildOpts.JSXDynamicFactory = value
+      } else {
+        transformOpts.JSXDynamicFactory = value
+      }
+
 		case strings.HasPrefix(arg, "--jsx-fragment="):
 			value := arg[len("--jsx-fragment="):]
 			if buildOpts != nil {
@@ -522,6 +538,21 @@ func parseOptionsImpl(
 			} else {
 				transformOpts.JSXFragment = value
 			}
+
+    case strings.HasPrefix(arg, "--jsx-automatic-runtime="):
+      if buildOpts != nil {
+        buildOpts.JSXAutomaticRuntime = true
+      } else {
+        transformOpts.JSXAutomaticRuntime = true
+      }
+
+    case strings.HasPrefix(arg, "--jsx-import-source="):
+      value := arg[len("--jsx-import-source="):]
+      if buildOpts != nil {
+        buildOpts.JSXImportSource = value
+      } else {
+        transformOpts.JSXImportSource = value
+      }
 
 		case strings.HasPrefix(arg, "--banner=") && transformOpts != nil:
 			transformOpts.Banner = arg[len("--banner="):]
@@ -635,57 +666,62 @@ func parseOptionsImpl(
 
 		default:
 			bare := map[string]bool{
-				"allow-overwrite":    true,
-				"bundle":             true,
-				"ignore-annotations": true,
-				"keep-names":         true,
-				"metafile":           true,
-				"minify-identifiers": true,
-				"minify-syntax":      true,
-				"minify-whitespace":  true,
-				"minify":             true,
-				"preserve-symlinks":  true,
-				"sourcemap":          true,
-				"splitting":          true,
-				"watch":              true,
+				"allow-overwrite":        true,
+				"bundle":                 true,
+				"ignore-annotations":     true,
+				"keep-names":             true,
+				"metafile":               true,
+				"minify-identifiers":     true,
+				"minify-syntax":          true,
+				"minify-whitespace":      true,
+				"minify":                 true,
+        "jsx-automatic-runtime":  true,
+				"preserve-symlinks":      true,
+				"sourcemap":              true,
+				"splitting":              true,
+				"watch":                  true,
 			}
 
 			equals := map[string]bool{
-				"asset-names":        true,
-				"banner":             true,
-				"charset":            true,
-				"chunk-names":        true,
-				"color":              true,
-				"conditions":         true,
-				"entry-names":        true,
-				"footer":             true,
-				"format":             true,
-				"global-name":        true,
-				"jsx-factory":        true,
-				"jsx-fragment":       true,
-				"jsx":                true,
-				"legal-comments":     true,
-				"loader":             true,
-				"log-level":          true,
-				"log-limit":          true,
-				"main-fields":        true,
-				"mangle-cache":       true,
-				"mangle-props":       true,
-				"outbase":            true,
-				"outdir":             true,
-				"outfile":            true,
-				"platform":           true,
-				"public-path":        true,
-				"reserve-props":      true,
-				"resolve-extensions": true,
-				"source-root":        true,
-				"sourcefile":         true,
-				"sourcemap":          true,
-				"sources-content":    true,
-				"target":             true,
-				"tree-shaking":       true,
-				"tsconfig-raw":       true,
-				"tsconfig":           true,
+				"asset-names":          true,
+				"banner":               true,
+				"charset":              true,
+				"chunk-names":          true,
+				"color":                true,
+				"conditions":           true,
+				"entry-names":          true,
+				"footer":               true,
+				"format":               true,
+				"global-name":          true,
+        "jsx-transform":        true,
+				"jsx-factory":          true,
+        "jsx-static-factory":   true,
+        "jsx-dynamic-factory":  true, 
+				"jsx-fragment":         true,
+        "jsx-import-source":    true,
+				"jsx":                  true,
+				"legal-comments":       true,
+				"loader":               true,
+				"log-level":            true,
+				"log-limit":            true,
+				"main-fields":          true,
+				"mangle-cache":         true,
+				"mangle-props":         true,
+				"outbase":              true,
+				"outdir":               true,
+				"outfile":              true,
+				"platform":             true,
+				"public-path":          true,
+				"reserve-props":        true,
+				"resolve-extensions":   true,
+				"source-root":          true,
+				"sourcefile":           true,
+				"sourcemap":            true,
+				"sources-content":      true,
+				"target":               true,
+				"tree-shaking":         true,
+				"tsconfig-raw":         true,
+				"tsconfig":             true,
 			}
 
 			colon := map[string]bool{
