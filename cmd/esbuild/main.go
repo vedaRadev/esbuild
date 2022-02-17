@@ -77,18 +77,20 @@ var helpText = func(colors logger.Colors) string {
                             incorrect tree-shaking annotations
   --inject:F                Import the file F into all input files and
                             automatically replace matching globals with imports
-  --jsx-transform=...       JSX transformation method (old | new, default old)
-                            old:  Transforms JSX to a single factory function
-                                  with parameters (type, [props], [...children])
-                            new:  Transforms JSX to one of two factory functions
-                                  (static, dynamic) with parameters (type, [props], key)
+  --jsx-factory-mode=...    single | dual, default single
+                            single: Transforms JSX to a single factory function
+                                    with parameters (type, [props], [...children])
+                                    (see --jsx-factory)
+                            dual:   Transforms JSX to one of two factory functions
+                                    (static, dynamic) with parameters (type, [props], key)
+                                    (see --jsx-static-factory and --jsx-dynamic-factory)
   --jsx-factory=...         What to use for JSX instead of React.createElement
                             (only when "--jsx-transform=old")
-  --jsx-fragment=...        What to use for JSX instead of React.Fragment
   --jsx-static-factory=...  What to use for JSX with static children instead of _jsx
                             (only when "--jsx-transform=new")
   --jsx-dynamic-factory=... What to use for JSX with dynamic children instead of _jsxs 
                             (only when "--jsx-transform=new")
+  --jsx-fragment=...        What to use for JSX instead of React.Fragment
   --jsx-automatic-runtime   Automatically import JSX functions
                             (only when "--jsx-transform=new") 
   --jsx-import-source       Where to import JSX functions from other than react/jsx-runtime

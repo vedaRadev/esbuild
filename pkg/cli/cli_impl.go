@@ -507,6 +507,26 @@ func parseOptionsImpl(
 				transformOpts.JSXMode = mode
 			}
 
+    case strings.HasPrefix(arg, "--jsx-factory-mode="):
+      value := arg[len("--jsx-factory-mode="):]
+      var mode api.JSXFactoryMode
+      switch value {
+      case "single":
+        mode = api.JSXFactoryModeSingle
+      case "dual":
+        mode = api.JSXFactoryModeDual
+      default:
+        return parseOptionsExtras{}, cli_helpers.MakeErrorWithNote(
+          fmt.Sprintf("Invalid value %q in %q", value, arg),
+          "Valid values are \"single\" or \"dual\".",
+        )
+      }
+      if buildOpts != nil {
+        buildOpts.JSXFactoryMode = mode
+      } else {
+        transformOpts.JSXFactoryMode = mode
+      }
+
 		case strings.HasPrefix(arg, "--jsx-factory="):
 			value := arg[len("--jsx-factory="):]
 			if buildOpts != nil {
@@ -693,7 +713,7 @@ func parseOptionsImpl(
 				"footer":               true,
 				"format":               true,
 				"global-name":          true,
-        "jsx-transform":        true,
+        "jsx-factory-mode":     true,
 				"jsx-factory":          true,
         "jsx-static-factory":   true,
         "jsx-dynamic-factory":  true, 
