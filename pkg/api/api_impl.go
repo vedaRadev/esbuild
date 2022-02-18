@@ -907,9 +907,12 @@ func rebuildImpl(
 		UnsupportedCSSFeatures: cssFeatures,
 		OriginalTargetEnv:      targetEnv,
 		JSX: config.JSXOptions{
-			Preserve: buildOpts.JSXMode == JSXModePreserve,
-			Factory:  validateJSXExpr(log, buildOpts.JSXFactory, "factory", js_parser.JSXFactory),
-			Fragment: validateJSXExpr(log, buildOpts.JSXFragment, "fragment", js_parser.JSXFragment),
+			Preserve:       buildOpts.JSXMode == JSXModePreserve,
+      DualFactories:  buildOpts.JSXFactoryMode == JSXFactoryModeDual,
+			Factory:        validateJSXExpr(log, buildOpts.JSXFactory, "factory", js_parser.JSXFactory),
+      StaticFactory:  validateJSXExpr(log, buildOpts.JSXStaticFactory, "static factory", js_parser.JSXFactory),
+      DynamicFactory: validateJSXExpr(log, buildOpts.JSXDynamicFactory, "dynamic factory", js_parser.JSXFactory),
+			Fragment:       validateJSXExpr(log, buildOpts.JSXFragment, "fragment", js_parser.JSXFragment),
 		},
 		Defines:               defines,
 		InjectedDefines:       injectedDefines,
@@ -1360,9 +1363,12 @@ func transformImpl(input string, transformOpts TransformOptions) TransformResult
 	unusedImportsTS := config.UnusedImportsRemoveStmt
 	useDefineForClassFieldsTS := config.Unspecified
 	jsx := config.JSXOptions{
-		Preserve: transformOpts.JSXMode == JSXModePreserve,
-		Factory:  validateJSXExpr(log, transformOpts.JSXFactory, "factory", js_parser.JSXFactory),
-		Fragment: validateJSXExpr(log, transformOpts.JSXFragment, "fragment", js_parser.JSXFragment),
+		Preserve:       transformOpts.JSXMode == JSXModePreserve,
+    DualFactories:  transformOpts.JSXFactoryMode == JSXFactoryModeDual,
+		Factory:        validateJSXExpr(log, transformOpts.JSXFactory, "factory", js_parser.JSXFactory),
+    StaticFactory:  validateJSXExpr(log, transformOpts.JSXStaticFactory, "static factory", js_parser.JSXFactory),
+    DynamicFactory: validateJSXExpr(log, transformOpts.JSXDynamicFactory, "dynamic factory", js_parser.JSXFactory),
+		Fragment:       validateJSXExpr(log, transformOpts.JSXFragment, "fragment", js_parser.JSXFragment),
 	}
 
 	// Settings from "tsconfig.json" override those

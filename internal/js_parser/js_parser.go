@@ -11658,71 +11658,103 @@ func (p *parser) visitExprInOut(expr js_ast.Expr, in exprIn) (js_ast.Expr, exprO
 				e.TagOrNil = value
 			}
 
-			// Arguments to createElement()
+      var factory config.JSXExpr
 			args := []js_ast.Expr{e.TagOrNil}
-      props := []js_ast.Property{}
 
-      if len(e.Children) > 0 {
-        var childrenPropValue js_ast.E
+      if p.options.jsx.DualFactories {
+        // Determine which factory we should be using
         if len(e.Children) > 1 {
-          childrenPropValue = &js_ast.EArray{ Items: e.Children }
+          factory = p.options.jsx.StaticFactory
         } else {
-          childrenPropValue = e.Children[0].Data
+          factory = p.options.jsx.DynamicFactory
         }
 
-        props = append(
-          props,
-          js_ast.Property{
-            Key: js_ast.Expr{
-              Loc: expr.Loc,
-              Data: &js_ast.EString{Value: helpers.StringToUTF16("children")},
+        hasKey := false
+        var keyValue js_ast.Expr
+        var props []js_ast.Property
+        // TODO Instead of doing this below, may want to modify parseJSXElement and parseJSXTag to
+        // construct a different variant of the EJSXElement.
+        // Also update EJSXElement to include a Key entry in the struct.
+        for i := range e.Properties {
+          if (e.Properties[i].Key.Data != nil) {
+            propertyName := e.Properties[i].Key.Data.(*js_ast.EString)
+            if helpers.UTF16EqualsString(propertyName.Value, "key") {
+              hasKey = true
+              keyValue = e.Properties[i].ValueOrNil
+              // Do not add prop with name "key" to list of props we send to the jsx factory
+              continue
+            }
+          } 
+
+          props = append(props, e.Properties[i])
+        }
+
+        if len(e.Children) > 0 {
+          var childrenPropValue js_ast.E
+          if len(e.Children) > 1 {
+            childrenPropValue = &js_ast.EArray{ Items: e.Children }
+          } else {
+            childrenPropValue = e.Children[0].Data
+          }
+
+          props = append(
+            props,
+            js_ast.Property{
+              Key: js_ast.Expr{
+                Loc: expr.Loc,
+                Data: &js_ast.EString{Value: helpers.StringToUTF16("children")},
+              },
+              ValueOrNil: js_ast.Expr{
+                Loc: expr.Loc,
+                Data: childrenPropValue,
+              },
+              Kind: js_ast.PropertyNormal,
+              IsComputed: false,
+              IsMethod: false,
+              IsStatic: false,
+              PreferQuotedKey: false,
             },
-            ValueOrNil: js_ast.Expr{
-              Loc: expr.Loc,
-              Data: childrenPropValue,
-            },
-            Kind: js_ast.PropertyNormal,
-            IsComputed: false,
-            IsMethod: false,
-            IsStatic: false,
-            PreferQuotedKey: false,
-          },
-        )
+          )
+        }
+
+        if len(props) > 0 {
+          args = append(args, p.lowerObjectSpread(expr.Loc, &js_ast.EObject{ Properties: props }))
+        } else {
+          args = append(args, js_ast.Expr{Loc: expr.Loc, Data: &js_ast.EObject{}})
+        }
+
+        if hasKey {
+          args = append(args, keyValue)
+        }
+
+      } else /* Single Factory */ {
+        factory = p.options.jsx.Factory
+
+        // Arguments to createElement()
+        if len(e.Properties) > 0 {
+          args = append(args, p.lowerObjectSpread(expr.Loc, &js_ast.EObject{
+            Properties: e.Properties,
+          }))
+        } else {
+          args = append(args, js_ast.Expr{Loc: expr.Loc, Data: js_ast.ENullShared})
+        }
+        if len(e.Children) > 0 {
+          args = append(args, e.Children...)
+        }
       }
 
-      if len(e.Properties) > 0 {
-        props = append(props, e.Properties...)
-      }
+      // Call to the appropriate JSX factory function
+      target := p.jsxStringsToMemberExpression(expr.Loc, factory.Parts)
+      p.warnAboutImportNamespaceCall(target, exprKindCall)
+      result := js_ast.Expr{Loc: expr.Loc, Data: &js_ast.ECall{
+        Target: target,
+        Args: args,
+        
+        // Enable tree shaking
+        CanBeUnwrappedIfUnused: !p.options.ignoreDCEAnnotations,
+      }}
 
-      if len(props) > 0 {
-        args = append(args, p.lowerObjectSpread(expr.Loc, &js_ast.EObject{ Properties: props }))
-      } else {
-        // Needs to be an empty object instead of null
-        args = append(args, js_ast.Expr{Loc: expr.Loc, Data: &js_ast.EObject{}})
-				// args = append(args, js_ast.Expr{Loc: expr.Loc, Data: js_ast.ENullShared})
-      }
-
-			// if len(e.Properties) > 0 {
-			// 	args = append(args, p.lowerObjectSpread(expr.Loc, &js_ast.EObject{
-			// 		Properties: e.Properties,
-			// 	}))
-			// } else {
-			// 	args = append(args, js_ast.Expr{Loc: expr.Loc, Data: js_ast.ENullShared})
-			// }
-			// if len(e.Children) > 0 {
-			// 	args = append(args, e.Children...)
-			// }
-
-			// Call createElement()
-			target := p.jsxStringsToMemberExpression(expr.Loc, p.options.jsx.Factory.Parts)
-			p.warnAboutImportNamespaceCall(target, exprKindCall)
-			return js_ast.Expr{Loc: expr.Loc, Data: &js_ast.ECall{
-				Target: target,
-				Args:   args,
-
-				// Enable tree shaking
-				CanBeUnwrappedIfUnused: !p.options.ignoreDCEAnnotations,
-			}}, exprOut{}
+      return result, exprOut{}
 		}
 
 	case *js_ast.ETemplate:
@@ -14862,6 +14894,8 @@ func newParser(log logger.Log, source logger.Source, lexer js_lexer.Lexer, optio
 }
 
 var defaultJSXFactory = []string{"React", "createElement"}
+var defaultJSXStaticFactory = []string{"_jsxs"}
+var defaultJSXDynamicFactory = []string{"_jsx"}
 var defaultJSXFragment = []string{"React", "Fragment"}
 
 func Parse(log logger.Log, source logger.Source, options Options) (result js_ast.AST, ok bool) {
@@ -14876,9 +14910,15 @@ func Parse(log logger.Log, source logger.Source, options Options) (result js_ast
 	}()
 
 	// Default options for JSX elements
-	if len(options.jsx.Factory.Parts) == 0 {
+	if len(options.jsx.Factory.Parts) == 0 && !options.jsx.DualFactories {
 		options.jsx.Factory = config.JSXExpr{Parts: defaultJSXFactory}
 	}
+  if len(options.jsx.StaticFactory.Parts) == 0 {
+    options.jsx.StaticFactory = config.JSXExpr{Parts: defaultJSXStaticFactory}
+  }
+  if len(options.jsx.DynamicFactory.Parts) == 0 {
+    options.jsx.DynamicFactory = config.JSXExpr{Parts: defaultJSXDynamicFactory}
+  }
 	if len(options.jsx.Fragment.Parts) == 0 && options.jsx.Fragment.Constant == nil {
 		options.jsx.Fragment = config.JSXExpr{Parts: defaultJSXFragment}
 	}

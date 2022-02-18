@@ -13,10 +13,13 @@ import (
 )
 
 type JSXOptions struct {
-	Factory  JSXExpr
-	Fragment JSXExpr
-	Parse    bool
-	Preserve bool
+	Factory         JSXExpr
+  StaticFactory   JSXExpr
+  DynamicFactory  JSXExpr
+	Fragment        JSXExpr
+	Parse           bool
+	Preserve        bool
+  DualFactories   bool
 }
 
 type JSXExpr struct {
