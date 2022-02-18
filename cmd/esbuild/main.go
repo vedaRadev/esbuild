@@ -85,16 +85,16 @@ var helpText = func(colors logger.Colors) string {
                                     (static, dynamic) with parameters (type, [props], key)
                                     (see --jsx-static-factory and --jsx-dynamic-factory)
   --jsx-factory=...         What to use for JSX instead of React.createElement
-                            (only when "--jsx-transform=old")
+                            (only when "--jsx-factory-mode=single")
   --jsx-static-factory=...  What to use for JSX with static children instead of _jsx
-                            (only when "--jsx-transform=new")
+                            (only when "--jsx-factory-mode=dual")
   --jsx-dynamic-factory=... What to use for JSX with dynamic children instead of _jsxs 
-                            (only when "--jsx-transform=new")
+                            (only when "--jsx-factory-mode=dual")
   --jsx-fragment=...        What to use for JSX instead of React.Fragment
   --jsx-automatic-runtime   Automatically import JSX functions
-                            (only when "--jsx-transform=new") 
+                            (only when "--jsx-factory-mode=dual") 
   --jsx-import-source       Where to import JSX functions from other than react/jsx-runtime
-                            (only when "--jsx-transform=new" and "--jsx-automatic-runtime")
+                            (only when "--jsx-factory-mode=dual" and "--jsx-automatic-runtime")
   --jsx=...                 Set to "preserve" to disable transforming JSX to JS
   --keep-names              Preserve "name" on functions and classes
   --legal-comments=...      Where to place legal comments (none | inline |
